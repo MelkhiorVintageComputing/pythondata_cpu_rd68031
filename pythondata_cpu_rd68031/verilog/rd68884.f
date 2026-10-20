@@ -1,0 +1,11 @@
+rd68884/rtl/rd68884_pkg.sv
+rd68884/rtl/gen/rd68884_ucode_pkg.sv
+rd68884/rtl/gen/rd68884_crom.sv
+rd68884/rtl/gen/rd68884_ucode_rom.sv
+rd68884/rtl/gen/rd68885_ucode_rom.sv
+rd68884/rtl/rd68884_sync.sv
+rd68884/rtl/rd68884_cu_decode.sv
+rd68884/rtl/rd68884_biu.sv
+rd68884/rtl/rd68884_regfile.sv
+rd68884/rtl/rd68884_seq.sv
+rd68884/rtl/rd68884_top.sv

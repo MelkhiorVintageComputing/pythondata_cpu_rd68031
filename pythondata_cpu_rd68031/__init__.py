@@ -47,6 +47,24 @@ sources = [
 # Verilator waivers, relative to data_location.
 verilator_config = "rtl/rd68031.vlt"
 
+# RD68884, the FPU (an MC68881), from its commit 0595f342ddd2e3472a09628195f18980dc6e87bd (0595f34),
+# relative to data_location, in compile order.
+fpu_git_hash = "0595f342ddd2e3472a09628195f18980dc6e87bd"
+fpu_sources = [
+    "rd68884/rtl/rd68884_pkg.sv",
+    "rd68884/rtl/gen/rd68884_ucode_pkg.sv",
+    "rd68884/rtl/gen/rd68884_crom.sv",
+    "rd68884/rtl/gen/rd68884_ucode_rom.sv",
+    "rd68884/rtl/gen/rd68885_ucode_rom.sv",
+    "rd68884/rtl/rd68884_sync.sv",
+    "rd68884/rtl/rd68884_cu_decode.sv",
+    "rd68884/rtl/rd68884_biu.sv",
+    "rd68884/rtl/rd68884_regfile.sv",
+    "rd68884/rtl/rd68884_seq.sv",
+    "rd68884/rtl/rd68884_top.sv",
+]
+fpu_verilator_config = "rd68884/rtl/rd68884.vlt"
+
 
 def data_file(f):
     """Get absolute path for file inside pythondata_cpu_rd68031."""

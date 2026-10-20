@@ -1,0 +1,23 @@
+`verilator_config
+
+// SPDX-License-Identifier: CERN-OHL-S-2.0
+// Copyright 2026 Romain Dolbeau
+// Source location: https://github.com/MelkhiorVintageComputing/RD68884
+
+// Waivers for RD68884. Every one has a reason; see doc/coding-standard.md.
+//
+// Two file-format traps, both measured in RD68021: the line above must be the
+// first token in this file, and no comment here may start with the word that
+// names this tool -- it parses those as directives. Globs are matched against the
+// path as given on the command line, so *rtl/foo.sv matches and */rtl/foo.sv does
+// not.
+
+// rd68884_pkg is a catalogue of architectural constants transcribed from the
+// manual. No single module uses all of them, and the point of the package is that
+// the numbers are written down once, with their citation -- so an unused one is
+// the normal case rather than a defect.
+lint_off -rule UNUSEDPARAM -file "*rtl/rd68884_pkg.sv"
+
+// The same for the generated microword package: it names every encoding the
+// microcode may use, and an encoding no microinstruction uses yet is normal.
+lint_off -rule UNUSEDPARAM -file "*rtl/gen/rd68884_ucode_pkg.sv"

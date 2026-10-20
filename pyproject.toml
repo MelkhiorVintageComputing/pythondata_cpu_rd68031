@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pythondata-cpu-rd68031"
 version = "0.0"
-description = "Python module containing the SystemVerilog files of the RD68031 (MC68030) CPU"
+description = "Python module containing the SystemVerilog files of the RD68031 (MC68030) CPU and its RD68884 (MC68881) FPU"
 license = {text = "CERN-OHL-S-2.0"}
 
 [tool.setuptools.packages.find]
