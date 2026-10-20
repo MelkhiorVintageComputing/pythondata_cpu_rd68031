@@ -1,0 +1,27 @@
+`verilator_config
+
+// SPDX-License-Identifier: CERN-OHL-S-2.0
+// Copyright 2026 Romain Dolbeau
+// Source location: https://github.com/MelkhiorVintageComputing/RD68031
+
+// Waivers for RD68031. Every one has a reason; see doc/coding-standard.md.
+//
+// Two file-format traps, both measured: the line above must be the first token in
+// this file, and no comment here may start with the word that names this tool --
+// it parses those as directives and reports a syntax error. Globs are matched
+// against the path as given on the command line, so *rtl/foo.sv matches and
+// */rtl/foo.sv does not.
+
+// rd68031_pkg is a catalogue of architectural constants transcribed from the
+// manual. No single module uses all of them, and the point of the package is that
+// the numbers are written down once, in one place, with their citation -- so an
+// unused one is the normal case rather than a defect.
+lint_off -rule UNUSEDPARAM -file "*rtl/rd68031_pkg.sv"
+
+// The same, for the generated packages. rd68031_ucode_pkg names every encoding
+// the microcode may use, and a field the microcode does not happen to use yet is
+// the normal state of a design being built up -- the point of the package is
+// that the RTL and the microcode agree about every field position, whether or
+// not a given value has appeared in a microword.
+lint_off -rule UNUSEDPARAM -file "*rtl/gen/rd68031_ucode_pkg.sv"
+lint_off -rule UNUSEDPARAM -file "*rtl/gen/rd68031_frame_pkg.sv"
