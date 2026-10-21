@@ -47,9 +47,14 @@ sources = [
 # Verilator waivers, relative to data_location.
 verilator_config = "rtl/rd68031.vlt"
 
-# RD68884, the FPU (an MC68881), from its commit 0595f342ddd2e3472a09628195f18980dc6e87bd (0595f34),
-# relative to data_location, in compile order.
+# RD68884, the FPU (an MC68881), from its commit 0595f342ddd2e3472a09628195f18980dc6e87bd with
+# litex-68k's patches/RD68884 (fpu_patches) applied and its microcode
+# regenerated (4ae60ca8eee2ffed03cd246c192c08cd4e9b6889, 4ae60ca), relative to data_location, in
+# compile order.
 fpu_git_hash = "0595f342ddd2e3472a09628195f18980dc6e87bd"
+fpu_patches = [
+    "0001-FSAVE-while-a-released-instruction-waits-for-its-rel.patch",
+]
 fpu_sources = [
     "rd68884/rtl/rd68884_pkg.sv",
     "rd68884/rtl/gen/rd68884_ucode_pkg.sv",
