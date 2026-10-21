@@ -787,6 +787,7 @@ module rd68884_seq #(
       rd68884_ucode_pkg::COND_Q_ODD:      cond_raw = c[0];
       rd68884_ucode_pkg::COND_A_POW2:     cond_raw = (a_mant == {1'b1, 71'd0});
       rd68884_ucode_pkg::COND_PCODE:      cond_raw = pcode;
+      rd68884_ucode_pkg::COND_RESP_SAVE:  cond_raw = ev_resp | save_req_i;
       rd68884_ucode_pkg::COND_CU_READY:   cond_raw = cu_ready_i;
       rd68884_ucode_pkg::COND_CU_VALID:   cond_raw = cu_valid_i;
       rd68884_ucode_pkg::COND_CU_MID:     cond_raw = cu_mid_i;

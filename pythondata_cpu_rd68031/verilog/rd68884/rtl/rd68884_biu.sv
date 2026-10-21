@@ -512,6 +512,8 @@ module rd68884_biu #(
   logic        cu_nofm_q;        // stage B: the APU's path chosen instead
   logic        cu_rd_q;          // ... FPm read through port B
   logic        cu_xrd_q;         // ... an extended store's operand going out
+  logic        cu_prd_q;         // ... its current primitive read (a busy frame
+                                 //     can catch it unread; CU_RESUME reposts it)
   logic [15:0] apu_word_q;       // the APU's instruction
   logic        dcc_v_q, dcc_cc_v_q;
   logic [3:0]  dcc_cc_q;
@@ -694,6 +696,15 @@ module rd68884_biu #(
   rd68884_cu_decode u_dec_grab (
       .word (cmd_word_q), .pcen(pcen_i), .takes(grab_takes), .prim(grab_prim),
       .n(grab_n), .bwl(grab_bwl), .len(grab_len));
+  // ... and the one it holds: its first primitive again, after FRESTORE.
+  logic        res_takes, res_bwl;
+  logic [15:0] res_prim;
+  logic [1:0]  res_n, res_len;
+  rd68884_cu_decode u_dec_res (
+      .word (cu_word_q), .pcen(pcen_i), .takes(res_takes), .prim(res_prim),
+      .n(res_n), .bwl(res_bwl), .len(res_len));
+  logic unused_res;
+  assign unused_res = &{1'b0, res_takes, res_bwl, res_n, res_len};
 
   // Where it goes: the operand's long words in order (S, L, W, B one; D two;
   // X three), counted down.
@@ -708,7 +719,7 @@ module rd68884_biu #(
   assign cu_d1_o    = cu_d1_q;
   assign cu_d2_o    = cu_d2_q;
   // The frame's CU words (doc/model.md): an empty CU is all ones.
-  assign cu_w0_o = cu_v_q ? {cu_word_q, 1'b0, cu_rel_q, cu_pcv_q, 5'b11111, 6'd0, cu_cnt_q}
+  assign cu_w0_o = cu_v_q ? {cu_word_q, 1'b0, cu_rel_q, cu_pcv_q, cu_prd_q, 4'b1111, 6'd0, cu_cnt_q}
                           : 32'hFFFF_FFFF;
   assign cu_w1_o = (cu_v_q & cu_pcv_q) ? cu_pc_q : 32'hFFFF_FFFF;
 
@@ -990,6 +1001,7 @@ module rd68884_biu #(
       fpiar_q         <= 32'd0;
       cu_v_q          <= 1'b0;
       cu_rel_q        <= 1'b0;
+      cu_prd_q        <= 1'b1;
       cu_nofm_q       <= 1'b0;
       cu_rd_q         <= 1'b0;
       cu_xrd_q        <= 1'b0;
@@ -1144,6 +1156,7 @@ module rd68884_biu #(
         cu_v_q   <= 1'b0;
         cu_rel_q <= 1'b0;
         cu_nofm_q <= 1'b0;
+        cu_prd_q  <= 1'b1;
         cu_rd_q   <= 1'b0;
         cu_xrd_q  <= 1'b0;
         cu_pcv_q <= 1'b0;
@@ -1161,6 +1174,7 @@ module rd68884_biu #(
             cu_v_q    <= ~cu_data_i[15];
             cu_word_q <= cu_data_i[31:16];
             cu_rel_q  <= ~cu_data_i[15] & cu_data_i[14];
+            cu_prd_q  <= cu_data_i[15] | cu_data_i[12];
             cu_pcv_q  <= ~cu_data_i[15] & cu_data_i[13];
             cu_cnt_q  <= cu_data_i[15] ? 2'd0 : cu_data_i[1:0];
             cu_nofm_q <= 1'b0;
@@ -1185,10 +1199,18 @@ module rd68884_biu #(
         endcase
       end
       if (IS82 && cu_resume_i) begin
-        // After FRESTORE of a busy frame: the CU's dialog as it was.
+        // After FRESTORE of a busy frame: the CU's dialog as it was. A
+        // primitive the main processor had not read is posted again.
         resp_dirty_q <= 1'b1;
-        oneshot_q    <= 1'b0;
-        if (cu_cnt_q != 2'd0) begin
+        oneshot_q    <= ~cu_prd_q;
+        if (!cu_prd_q) begin
+          resp_q        <= cu_xrd_q ? 16'h320C : res_prim;
+          expect_q      <= rd68884_pkg::EXP_RESP;
+          expect_next_q <= cu_xrd_q ? rd68884_pkg::EXP_OPR :
+                           (cu_cnt_q != 2'd0) ? rd68884_pkg::EXP_OPW : rd68884_pkg::EXP_CMD;
+          oplen_q       <= (cu_word_q[12:10] == 3'd6) ? 2'd1 :
+                           (cu_word_q[12:10] == 3'd4) ? 2'd2 : 2'd0;
+        end else if (cu_cnt_q != 2'd0) begin
           resp_q   <= cu_bwl_q ? rd68884_pkg::PRIM_NULL_WAIT : rd68884_pkg::PRIM_NULL_REL;
           expect_q <= cu_xrd_q ? rd68884_pkg::EXP_OPR : rd68884_pkg::EXP_OPW;
           oplen_q  <= (cu_word_q[12:10] == 3'd6) ? 2'd1 :
@@ -1220,6 +1242,7 @@ module rd68884_biu #(
         end else if (cu_dlg) begin
           // The CU's first primitive: register to register releases at
           // once (figure 7-17); S, D, X answer $0900 (7-19), B, W, L $8900.
+          cu_prd_q <= 1'b1;
           if (cu_cnt_q == 2'd0) begin
             cu_rel_q <= 1'b1;
           end else begin
@@ -1242,6 +1265,7 @@ module rd68884_biu #(
         cu_nofm_q     <= 1'b0;
         cu_rd_q       <= 1'b0;
         cu_xrd_q      <= 1'b0;
+        cu_prd_q      <= cu_x;               // an extended store's null is no primitive
         cu_pc_q       <= 32'hFFFF_FFFF;
         cu_d0_q       <= 32'hFFFF_FFFF;
         cu_d1_q       <= 32'hFFFF_FFFF;
@@ -1413,6 +1437,7 @@ module rd68884_biu #(
         cu_bwl_q  <= 1'b0;
         cu_cnt_q  <= 2'd0;
         cu_nofm_q <= 1'b0;
+        cu_prd_q  <= 1'b1;
         cu_rd_q   <= 1'b0;
         cu_xrd_q  <= 1'b0;
         cu_pc_q   <= 32'hFFFF_FFFF;
@@ -1435,6 +1460,7 @@ module rd68884_biu #(
         cu_d2_q       <= q_m[39:8];
         cu_cnt_q      <= 2'd3;
         cu_xrd_q      <= 1'b1;
+        cu_prd_q      <= 1'b0;
         resp_q        <= 16'h320C;
         oneshot_q     <= 1'b1;
         resp_dirty_q  <= 1'b1;
@@ -1450,6 +1476,7 @@ module rd68884_biu #(
           cu_v_q   <= 1'b0;
           cu_rel_q <= 1'b0;
           cu_nofm_q <= 1'b0;
+          cu_prd_q  <= 1'b1;
           cu_rd_q   <= 1'b0;
           cu_xrd_q  <= 1'b0;
           cu_pcv_q <= 1'b0;
@@ -1504,6 +1531,7 @@ module rd68884_biu #(
         cu_v_q          <= 1'b0;
         cu_rel_q        <= 1'b0;
         cu_nofm_q       <= 1'b0;
+        cu_prd_q        <= 1'b1;
         cu_rd_q         <= 1'b0;
         cu_xrd_q        <= 1'b0;
         cu_pcv_q        <= 1'b0;

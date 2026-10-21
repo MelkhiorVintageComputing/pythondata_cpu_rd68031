@@ -100,6 +100,7 @@ package rd68884_ucode_pkg;
   localparam logic [6:0] COND_CU_VALID = 7'd67;
   localparam logic [6:0] COND_CU_MID = 7'd68;
   localparam logic [6:0] COND_PCODE = 7'd69;
+  localparam logic [6:0] COND_RESP_SAVE = 7'd70;
 
   localparam int F_IDX_LSB = 11;
   localparam int F_IDX_W   = 2;
@@ -371,12 +372,12 @@ package rd68884_ucode_pkg;
 
   localparam logic [11:0] ENTRY_RESET = 12'd0;
   localparam logic [11:0] ENTRY_ABORT = 12'd7;
-  localparam logic [11:0] ENTRY_RESTORE = 12'd2669;
+  localparam logic [11:0] ENTRY_RESTORE = 12'd2670;
   localparam logic [11:0] ENTRY_ILLEGAL = 12'd6;
   // The MC68882 program (RD68885)
   localparam logic [11:0] ENTRY82_RESET = 12'd0;
   localparam logic [11:0] ENTRY82_ABORT = 12'd7;
-  localparam logic [11:0] ENTRY82_RESTORE = 12'd2768;
+  localparam logic [11:0] ENTRY82_RESTORE = 12'd2769;
   localparam logic [11:0] ENTRY82_ILLEGAL = 12'd6;
   localparam logic [11:0] ENTRY82_ABORT_AB = 12'd8;
 
