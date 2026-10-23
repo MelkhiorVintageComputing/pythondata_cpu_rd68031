@@ -9,14 +9,14 @@ version_str = "0.0"
 version_tuple = (0, 0)
 
 # Data version info: the RD68031 commit the RTL was copied from.
-data_git_hash = "e29b75605d1423ef3f54c90dedb014e86c71f422"
-data_git_describe = "e29b756"
+data_git_hash = "5e22ddca9dbb6d0399eb9e9377e75050508e644d"
+data_git_describe = "5e22ddc"
 data_git_msg = """\
-commit e29b75605d1423ef3f54c90dedb014e86c71f422
+commit 5e22ddca9dbb6d0399eb9e9377e75050508e644d
 Author: Romain Dolbeau <romain@dolbeau.org>
-Date:   Mon Oct 19 15:14:40 2026 +0200
+Date:   Fri Oct 23 14:42:03 2026 +0200
 
-    M14 (phase B): SunOS 4.1.1 to multi-user on the core, and an RTE rerun fixed
+    M14 (phase B): the FPU's memory operands faulting in the MMU, with RD68884
 """
 
 # The RTL, relative to data_location, in compile order (packages first).
@@ -47,9 +47,9 @@ sources = [
 # Verilator waivers, relative to data_location.
 verilator_config = "rtl/rd68031.vlt"
 
-# RD68884, the FPU (an MC68881), from its commit 7a188db94bdcc6518a94ad36ffe931214c0e78e7 as it is,
+# RD68884, the FPU (an MC68881), from its commit 7ec30da7f7f2af26ac0f068c0b72f08db8d83cf0 as it is,
 # relative to data_location, in compile order.
-fpu_git_hash = "7a188db94bdcc6518a94ad36ffe931214c0e78e7"
+fpu_git_hash = "7ec30da7f7f2af26ac0f068c0b72f08db8d83cf0"
 fpu_patches = [
 
 ]
